@@ -754,6 +754,15 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPackets::Character::PlayerLogin&
         SendConnectToInstance(WorldPackets::Auth::ConnectToSerial::WorldAttempt1);
 }
 
+void WorldSession::AltbotLogin(ObjectGuid guid)
+{
+    _isAltbot = true;
+    _altbotGuid = guid;
+    m_playerLoading = guid;
+    _legacyConnectionModeEnabled = true;
+    HandleContinuePlayerLogin();
+}
+
 void WorldSession::HandleContinuePlayerLogin()
 {
     if (!PlayerLoading() || GetPlayer())

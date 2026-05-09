@@ -370,6 +370,7 @@ class TC_GAME_API Group
         void NeedBeforeGreed(Loot* loot, WorldObject* pLootedObject);
         void MasterLoot(Loot* loot, WorldObject* pLootedObject);
         Rolls::iterator GetRoll(ObjectGuid Guid);
+        Rolls const& GetRolls() const { return RollId; }
         void CountTheRoll(Rolls::iterator roll, Map* allowedMap);
         void CountRollVote(ObjectGuid playerGUID, ObjectGuid Guid, uint8 Choise);
         void EndRoll(Loot* loot, Map* allowedMap);

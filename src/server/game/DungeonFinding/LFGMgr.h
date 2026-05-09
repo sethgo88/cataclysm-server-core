@@ -413,6 +413,8 @@ class TC_GAME_API LFGMgr
         void InitBoot(ObjectGuid gguid, ObjectGuid kguid, ObjectGuid vguid, std::string const& reason);
         /// Updates player boot proposal with new player answer
         void UpdateBoot(ObjectGuid guid, bool accept);
+        /// Get the pending proposal id for a given player (0 if not in a proposal)
+        uint32 GetPendingProposalIdForPlayer(ObjectGuid guid);
         /// Updates proposal to join dungeon with player answer
         void UpdateProposal(uint32 proposalId, ObjectGuid guid, bool accept);
         /// Updates the role check with player answer

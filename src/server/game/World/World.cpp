@@ -337,6 +337,15 @@ void World::AddSession_(WorldSession* s)
 {
     ASSERT(s);
 
+    // Altbot sessions must not go through the normal account-keyed session management â
+    // doing so would kick the master player who shares the same account.
+    if (s->IsAltbot())
+    {
+        m_altbotSessions[s->GetAltbotGuid().GetCounter()] = s;
+        UpdateMaxSessionCounters();
+        return;
+    }
+
     //NOTE - Still there is race condition in WorldSession* being used in the Sockets
 
     ///- kick already loaded player with same account (if any) and remove session
@@ -3161,6 +3170,22 @@ void World::UpdateSessions(uint32 diff)
             m_sessions.erase(itr);
             delete pSession;
 
+        }
+    }
+
+    // Update altbot sessions (separate map â not account-keyed)
+    for (SessionMap::iterator itr = m_altbotSessions.begin(), next; itr != m_altbotSessions.end(); itr = next)
+    {
+        next = itr;
+        ++next;
+
+        WorldSession* pSession = itr->second;
+        WorldSessionFilter updater(pSession);
+
+        if (!pSession->Update(diff, updater))
+        {
+            m_altbotSessions.erase(itr);
+            delete pSession;
         }
     }
 }

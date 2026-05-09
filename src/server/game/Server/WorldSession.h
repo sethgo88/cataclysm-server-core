@@ -476,6 +476,11 @@ class TC_GAME_API WorldSession
 {
     public:
         WorldSession(uint32 id, std::string&& name, std::shared_ptr<WorldSocket> sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter);
+        /// Called by AltbotMgr to load an existing character as an AI-driven bot session.
+        /// Sets up the login query holder and fires the DB load without a real client connection.
+        void AltbotLogin(ObjectGuid guid);
+        bool IsAltbot() const { return _isAltbot; }
+        ObjectGuid GetAltbotGuid() const { return _altbotGuid; }
         ~WorldSession();
 
         bool PlayerLoading() const { return !m_playerLoading.IsEmpty(); }
@@ -1421,6 +1426,8 @@ class TC_GAME_API WorldSession
 
         GameClient* _gameClient;
         bool _legacyConnectionModeEnabled;
+        bool _isAltbot;
+        ObjectGuid _altbotGuid;
 
         WorldSession(WorldSession const& right) = delete;
         WorldSession& operator=(WorldSession const& right) = delete;

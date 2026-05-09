@@ -1092,6 +1092,14 @@ uint32 LFGMgr::AddProposal(LfgProposal& proposal)
    @param[in]     guid Player guid to update answer
    @param[in]     accept Player answer
 */
+uint32 LFGMgr::GetPendingProposalIdForPlayer(ObjectGuid guid)
+{
+    for (LfgProposalContainer::const_iterator it = ProposalsStore.begin(); it != ProposalsStore.end(); ++it)
+        if (it->second.players.count(guid))
+            return it->first;
+    return 0;
+}
+
 void LFGMgr::UpdateProposal(uint32 proposalId, ObjectGuid guid, bool accept)
 {
     // Check if the proposal exists

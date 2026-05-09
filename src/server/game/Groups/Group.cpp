@@ -233,7 +233,7 @@ void Group::LoadMemberFromDB(ObjectGuid::LowType guidLow, uint8 memberFlags, uin
 void Group::ConvertToLFG()
 {
     m_groupFlags = GroupFlags(m_groupFlags | GROUP_FLAG_LFG | GROUP_FLAG_LFG_RESTRICTED);
-    m_lootMethod = NEED_BEFORE_GREED;
+    m_lootMethod = FREE_FOR_ALL;
     if (!isBGGroup() && !isBFGroup())
     {
         CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GROUP_TYPE);
@@ -250,7 +250,7 @@ void Group::ConvertToLFG()
 void Group::ConvertToLFR()
 {
     m_groupFlags  = GroupFlags(m_groupFlags | GROUP_FLAG_LFG | GROUP_FLAG_LFG_RESTRICTED | GROUP_FLAG_RAID);
-    m_lootMethod = NEED_BEFORE_GREED;
+    m_lootMethod = FREE_FOR_ALL;
 
     _initRaidSubGroupsCounter();
 

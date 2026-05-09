@@ -852,6 +852,7 @@ class TC_GAME_API World
         time_t mail_timer_expires;
 
         SessionMap m_sessions;
+        SessionMap m_altbotSessions;  ///< Bot sessions keyed by character guid low â bypass account-keyed kick logic
         typedef std::unordered_map<uint32, time_t> DisconnectMap;
         DisconnectMap m_disconnects;
         uint32 m_maxActiveSessionCount;

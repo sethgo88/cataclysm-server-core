@@ -14,6 +14,7 @@ if (APPLE)
   set(strtod_l_headers ${strtod_l_headers} xlocale.h)
 endif ()
 
+include(CheckSymbolExists)
 if(WIN32)
   check_symbol_exists(_strtod_l "${strtod_l_headers}" HAVE_STRTOD_L)
 else()

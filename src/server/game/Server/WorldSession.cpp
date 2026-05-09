@@ -140,7 +140,8 @@ WorldSession::WorldSession(uint32 id, std::string&& name, std::shared_ptr<WorldS
     _timeSyncClockDelta(0),
     _pendingTimeSyncRequests(),
     _gameClient(new GameClient(this)),
-    _legacyConnectionModeEnabled(sWorld->getBoolConfig(CONFIG_LEGACY_CONNECTION_MODE))
+    _legacyConnectionModeEnabled(sWorld->getBoolConfig(CONFIG_LEGACY_CONNECTION_MODE)),
+    _isAltbot(false)
 {
     memset(m_Tutorials, 0, sizeof(m_Tutorials));
 
@@ -259,7 +260,8 @@ void WorldSession::SendPacket(WorldPacket const* packet, bool forced /*= false*/
 
     if (!m_Socket[conIdx])
     {
-        TC_LOG_ERROR("network.opcode", "Prevented sending of %s to non existent socket %u to %s", GetOpcodeNameForLogging(static_cast<OpcodeServer>(packet->GetOpcode())).c_str(), uint32(conIdx), GetPlayerInfo().c_str());
+        if (!IsAltbot())
+            TC_LOG_ERROR("network.opcode", "Prevented sending of %s to non existent socket %u to %s", GetOpcodeNameForLogging(static_cast<OpcodeServer>(packet->GetOpcode())).c_str(), uint32(conIdx), GetPlayerInfo().c_str());
         return;
     }
 
@@ -345,7 +347,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
 
     ///- Before we process anything:
     /// If necessary, kick the player from the character select screen
-    if (IsConnectionIdle() && !HasPermission(rbac::RBAC_PERM_IGNORE_IDLE_CONNECTION))
+    if (IsConnectionIdle() && !HasPermission(rbac::RBAC_PERM_IGNORE_IDLE_CONNECTION) && m_Socket[CONNECTION_TYPE_REALM])
         m_Socket[CONNECTION_TYPE_REALM]->CloseSocket();
 
     ///- Retrieve packets from the receive queue and call the appropriate handlers
@@ -524,7 +526,11 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
         }
 
         if (!m_Socket[CONNECTION_TYPE_REALM])
+        {
+            if (_isAltbot)
+                return true;  // altbot sessions have no socket but must remain alive
             return false;                                       //Will remove this session from the world session map
+        }
     }
 
     return true;
