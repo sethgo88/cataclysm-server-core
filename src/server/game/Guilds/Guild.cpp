@@ -721,6 +721,7 @@ bool Guild::Member::LoadFromDB(Field* fields)
 
 void Guild::Member::LoadProfessionDataFromDB(ObjectGuid guid)
 {
+    TC_LOG_INFO("guild", "[altbot-trace] LoadProfessionDataFromDB enter %s", guid.ToString().c_str());
     CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_SKILLS);
     stmt->setUInt32(0, guid.GetCounter());
     PreparedQueryResult result = CharacterDatabase.Query(stmt);
@@ -737,6 +738,8 @@ void Guild::Member::LoadProfessionDataFromDB(ObjectGuid guid)
             SkillLineEntry const* skillLine = sSkillLineStore.LookupEntry(skill);
             if (!skillLine || skillLine->CategoryID != SKILL_CATEGORY_PROFESSION)
                 continue;
+
+            TC_LOG_INFO("guild", "[altbot-trace]   skill=%u value=%u max=%u idx=%u", skill, value, max, professionIndex);
 
             GuildMemberProfessionData profession(skill, max / 75, value);
 
@@ -761,18 +764,31 @@ void Guild::Member::LoadProfessionDataFromDB(ObjectGuid guid)
                             uint16 index = prof.UniqueBits / 8;
                             uint8 offset = prof.UniqueBits % 8;
                             uint8 bit = 1 << offset;
+                            if (index >= profession.RecipeUniqueBits.size())
+                            {
+                                TC_LOG_ERROR("guild", "[altbot-trace] RecipeUniqueBits OOB skill=%u spell=%u uniqueBits=%u index=%u size=%zu",
+                                    skill, spellId, prof.UniqueBits, index, profession.RecipeUniqueBits.size());
+                                continue;
+                            }
                             profession.RecipeUniqueBits[index] |= bit;
                         }
                     }
 
                 } while (result2->NextRow());
 
-                m_professions[professionIndex] = profession;
-                professionIndex++;
+                if (professionIndex < GUILD_PROFESSION_COUNT)
+                {
+                    m_professions[professionIndex] = profession;
+                    professionIndex++;
+                }
             }
+
+            if (professionIndex >= GUILD_PROFESSION_COUNT)
+                break;
 
         } while (result->NextRow());
     }
+    TC_LOG_INFO("guild", "[altbot-trace] LoadProfessionDataFromDB exit %s loaded=%u", guid.ToString().c_str(), professionIndex);
 }
 
 // Validate player fields. Returns false if corrupted fields are found.
